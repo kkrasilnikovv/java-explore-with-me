@@ -41,7 +41,7 @@ public class UserService {
 
     @Transactional
     public UserDto saveUser(NewUserRequest newUserRequest) {
-        if(userRepository.findByName(newUserRequest.getName()).isPresent()){
+        if (userRepository.findByName(newUserRequest.getName()).isPresent()) {
             throw new ObjectsConflictException("User with given name already exists");
         }
         return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(newUserRequest)));
