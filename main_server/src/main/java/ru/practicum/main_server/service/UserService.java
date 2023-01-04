@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_server.dto.NewUserRequest;
 import ru.practicum.main_server.dto.UserDto;
 import ru.practicum.main_server.exception.ObjectNotFoundException;
+import ru.practicum.main_server.exception.ObjectsConflictException;
 import ru.practicum.main_server.mapper.UserMapper;
 import ru.practicum.main_server.model.User;
 import ru.practicum.main_server.repository.UserRepository;
@@ -40,6 +41,9 @@ public class UserService {
 
     @Transactional
     public UserDto saveUser(NewUserRequest newUserRequest) {
+        if(userRepository.findByName(newUserRequest.getName()).isPresent()){
+            throw new ObjectsConflictException("User with given name already exists");
+        }
         return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(newUserRequest)));
     }
 

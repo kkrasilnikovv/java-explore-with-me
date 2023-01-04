@@ -1,6 +1,8 @@
 package ru.practicum.main_server.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main_server.dto.AdminUpdateEventRequest;
 import ru.practicum.main_server.dto.EventFullDto;
@@ -20,16 +22,16 @@ public class EventAdminController {
     }
 
     @GetMapping
-    public List<EventFullDto> getEvents(@RequestParam List<Long> users,
-                                        @RequestParam List<State> states,
-                                        @RequestParam List<Long> categories,
-                                        @RequestParam String rangeStart,
-                                        @RequestParam String rangeEnd,
-                                        @RequestParam(defaultValue = "0", required = false) int from,
-                                        @RequestParam(defaultValue = "10", required = false) int size) {
+    public ResponseEntity<Object> getEvents(@RequestParam(required = false) List<Long> users,
+                                            @RequestParam(defaultValue = "PUBLISHED", required = false) List<State> states,
+                                            @RequestParam(required = false) List<Long> categories,
+                                            @RequestParam(required = false) String rangeStart,
+                                            @RequestParam(required = false) String rangeEnd,
+                                            @RequestParam(defaultValue = "0", required = false) int from,
+                                            @RequestParam(defaultValue = "10", required = false) int size) {
         log.info("get admin events");
-
-        return eventService.getAdminEvents(users, states, categories, rangeStart, rangeEnd, from, size);
+        return new ResponseEntity<>(eventService.getAdminEvents(users, states, categories, rangeStart, rangeEnd,
+                from, size), HttpStatus.OK);
     }
 
     @PutMapping("/{eventId}")
