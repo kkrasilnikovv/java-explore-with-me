@@ -1,5 +1,6 @@
 package ru.practicum.main_server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -7,11 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_server.dto.CategoryDto;
 import ru.practicum.main_server.dto.NewCategoryDto;
 import ru.practicum.main_server.exception.ObjectNotFoundException;
+import ru.practicum.main_server.exception.ObjectsConflictException;
 import ru.practicum.main_server.mapper.CategoryMapper;
 import ru.practicum.main_server.model.Category;
 import ru.practicum.main_server.repository.CategoryRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +35,6 @@ public class CategoryService {
     }
 
     public CategoryDto getCategoryById(long id) {
-
         return CategoryMapper.toCategoryDto(categoryRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Category not found")));
     }
@@ -41,6 +43,7 @@ public class CategoryService {
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = categoryRepository.findById(categoryDto.getId())
                 .orElseThrow(() -> new ObjectNotFoundException("Category not found"));
+        checkForConflicts(categoryDto.getName());
         category.setName(categoryDto.getName());
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
     }
@@ -55,6 +58,14 @@ public class CategoryService {
     @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         Category category = CategoryMapper.toCategoryFromNewCategoryDto(newCategoryDto);
+        checkForConflicts(newCategoryDto.getName());
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
+    }
+
+    private void checkForConflicts(String name) {
+        Optional<Category> categoryForCheck = categoryRepository.findByName(name);
+        if (categoryForCheck.isPresent()) {
+            throw new ObjectsConflictException("Name of category used");
+        }
     }
 }
