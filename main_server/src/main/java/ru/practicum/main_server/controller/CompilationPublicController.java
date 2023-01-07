@@ -1,5 +1,6 @@
 package ru.practicum.main_server.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main_server.dto.CompilationDto;
@@ -10,12 +11,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/compilations")
 @Slf4j
+@RequiredArgsConstructor
 public class CompilationPublicController {
     private final CompilationService compilationService;
-
-    public CompilationPublicController(CompilationService compilationService) {
-        this.compilationService = compilationService;
-    }
 
     @GetMapping()
     List<CompilationDto> getCompilations(@RequestParam(defaultValue = "true") Boolean pinned,

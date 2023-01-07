@@ -1,5 +1,6 @@
 package ru.practicum.main_server.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +15,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/admin/events")
 @Slf4j
+@RequiredArgsConstructor
 public class EventAdminController {
     private final EventService eventService;
-
-    public EventAdminController(EventService eventService) {
-        this.eventService = eventService;
-    }
 
     @GetMapping
     public ResponseEntity<Object> getEvents(@RequestParam(required = false) List<Long> users,

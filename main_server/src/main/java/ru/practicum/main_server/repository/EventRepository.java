@@ -32,6 +32,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND ( e.eventDate <= :end)")
     Page<Event> searchEventsByAdmin(List<Long> users, List<State> states, List<Long> categories,
                                     LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    void deleteByIdIn(List<Long> id);
 }
 
 

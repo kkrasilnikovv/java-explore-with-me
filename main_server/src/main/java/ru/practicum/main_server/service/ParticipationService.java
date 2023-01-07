@@ -1,6 +1,6 @@
 package ru.practicum.main_server.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_server.dto.ParticipationRequestDto;
@@ -9,7 +9,6 @@ import ru.practicum.main_server.exception.WrongRequestException;
 import ru.practicum.main_server.mapper.ParticipationMapper;
 import ru.practicum.main_server.model.*;
 import ru.practicum.main_server.repository.ParticipationRepository;
-import ru.practicum.main_server.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,17 +16,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ParticipationService {
     private final ParticipationRepository participationRepository;
     private final UserService userService;
     private final EventService eventService;
-
-    @Autowired
-    public ParticipationService(ParticipationRepository participationRepository, UserRepository userRepository, UserService userService, EventService eventService) {
-        this.participationRepository = participationRepository;
-        this.userService = userService;
-        this.eventService = eventService;
-    }
 
     public List<ParticipationRequestDto> getParticipationRequestsByUser(Long userId) {
         User requester = userService.checkAndGetUser(userId);

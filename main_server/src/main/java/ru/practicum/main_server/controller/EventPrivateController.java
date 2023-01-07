@@ -1,5 +1,6 @@
 package ru.practicum.main_server.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/users/{userId}/events")
 @Slf4j
+@RequiredArgsConstructor
 public class EventPrivateController {
     private final EventService eventService;
     private final ParticipationService participationService;
-
-    public EventPrivateController(EventService eventService, ParticipationService participationService) {
-        this.eventService = eventService;
-        this.participationService = participationService;
-    }
 
     @GetMapping()
     List<EventShortDto> getEventsCurrentUser(@PathVariable long userId,

@@ -1,5 +1,6 @@
 package ru.practicum.main_server.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main_server.dto.CategoryDto;
@@ -10,12 +11,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/categories")
 @Slf4j
+@RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
-
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @GetMapping
     List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") int from,

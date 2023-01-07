@@ -1,6 +1,6 @@
 package ru.practicum.main_server.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,17 +19,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
     private final EventService eventService;
-
-    @Autowired
-    public CompilationService(CompilationRepository compilationRepository, EventRepository eventRepository, EventService eventService) {
-        this.compilationRepository = compilationRepository;
-        this.eventRepository = eventRepository;
-        this.eventService = eventService;
-    }
 
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         return compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size))
@@ -67,9 +61,8 @@ public class CompilationService {
             deleteCompilationFromMainPage(compId);
         }
         if (compilation.getEvents().size() > 0) {
-            for (Event event : compilation.getEvents()) {
-                deleteEventFromCompilation(compId, event.getId());
-            }
+            eventRepository.deleteByIdIn(compilation.getEvents().stream().map(Event::getId)
+                    .collect(Collectors.toList()));
         }
         compilationRepository.deleteById(compId);
     }

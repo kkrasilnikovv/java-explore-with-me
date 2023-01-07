@@ -1,5 +1,6 @@
 package ru.practicum.main_server.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,12 +15,14 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionHandlers {
     static final String REASON_MESSAGE = "object not found";
 
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError notFound(RuntimeException e) {
+        log.error(e.getMessage());
         return ApiError.builder()
                 .status(String.valueOf(HttpStatus.NOT_FOUND))
                 .reason(REASON_MESSAGE)
@@ -31,6 +34,7 @@ public class ExceptionHandlers {
     @ExceptionHandler(WrongRequestException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiError forbidden(RuntimeException e) {
+        log.error(e.getMessage());
         return ApiError.builder()
                 .status(String.valueOf(HttpStatus.FORBIDDEN))
                 .reason(REASON_MESSAGE)
@@ -42,8 +46,9 @@ public class ExceptionHandlers {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError requestErrors(IllegalArgumentException e) {
+        log.error(e.getMessage());
         return ApiError.builder()
-                .errors(Arrays.stream(e.getStackTrace()).map(error -> error.toString()).collect(Collectors.toList()))
+                .errors(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.toList()))
                 .status(String.valueOf(HttpStatus.BAD_REQUEST))
                 .reason(REASON_MESSAGE)
                 .message("validation error, " + e.getLocalizedMessage())
@@ -54,8 +59,9 @@ public class ExceptionHandlers {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError validHandle(MethodArgumentNotValidException e) {
+        log.error(e.getMessage());
         return ApiError.builder()
-                .errors(Arrays.stream(e.getStackTrace()).map(error -> error.toString()).collect(Collectors.toList()))
+                .errors(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.toList()))
                 .status(String.valueOf(HttpStatus.BAD_REQUEST))
                 .reason(REASON_MESSAGE)
                 .message("validation error, " + e.getLocalizedMessage())

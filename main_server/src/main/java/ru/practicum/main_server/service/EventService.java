@@ -1,5 +1,6 @@
 package ru.practicum.main_server.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
@@ -32,16 +34,6 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final LocationService locationService;
 
-    public EventService(EventRepository eventRepository, ParticipationRepository participationRepository,
-                        HitClient hitClient, UserService userService, CategoryRepository categoryRepository, LocationService locationService) {
-        this.eventRepository = eventRepository;
-        this.participationRepository = participationRepository;
-        this.userService = userService;
-        this.hitClient = hitClient;
-        this.categoryRepository = categoryRepository;
-        this.locationService = locationService;
-    }
-
     public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
                                          String rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
         LocalDateTime start = (rangeStart == null) ? LocalDateTime.now() :
@@ -49,7 +41,7 @@ public class EventService {
 
         LocalDateTime end;
         if (rangeEnd == null) {
-            end = LocalDateTime.of(8888, 8, 8, 8, 00);
+            end = LocalDateTime.of(8888, 8, 8, 8, 0);
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
@@ -198,7 +190,7 @@ public class EventService {
         }
         LocalDateTime end;
         if (rangeEnd == null) {
-            end = LocalDateTime.of(8888, 8, 8, 8, 00);
+            end = LocalDateTime.of(8888, 8, 8, 8, 0);
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
