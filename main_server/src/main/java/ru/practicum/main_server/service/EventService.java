@@ -14,6 +14,7 @@ import ru.practicum.main_server.mapper.EventMapper;
 import ru.practicum.main_server.model.*;
 import ru.practicum.main_server.repository.CategoryRepository;
 import ru.practicum.main_server.repository.EventRepository;
+import ru.practicum.main_server.repository.LocationRepository;
 import ru.practicum.main_server.repository.ParticipationRepository;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class EventService {
     private final UserService userService;
     private final HitClient hitClient;
     private final CategoryRepository categoryRepository;
-    private final LocationService locationService;
+    private final LocationRepository locationRepository;
 
     public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
                                          String rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
@@ -47,7 +48,7 @@ public class EventService {
         }
 
         List<Event> events = eventRepository.searchEvents(text, categories, paid, start, end,
-                PageRequest.of(from / size, size))
+                        PageRequest.of(from / size, size))
                 .stream()
                 .collect(Collectors.toList());
         if ("EVENT_DATE".equals(sort)) {
@@ -137,9 +138,14 @@ public class EventService {
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
         Location location = newEventDto.getLocation();
-        log.info("before location save");
-        location = locationService.save(location);
-        log.info("location save");
+        log.info("before location find");
+        Optional<Location> locationFromBd = locationRepository.findByLatAndLon(location.getLat(), location.getLon());
+        if (locationFromBd.isEmpty()) {
+            locationRepository.save(location);
+            log.info("generate new location");
+        } else {
+            log.info("location find");
+        }
         Event event = EventMapper.toNewEvent(newEventDto);
         log.info("event {}", event);
         if (event.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
@@ -199,7 +205,7 @@ public class EventService {
         }
 
         return eventRepository.searchEventsByAdmin(users, states, categories, start, end,
-                PageRequest.of(from / size, size))
+                        PageRequest.of(from / size, size))
                 .stream()
                 .map(EventMapper::toEventFullDto)
                 .map(this::setConfirmedRequestsAndViewsEventFullDto)
@@ -324,5 +330,31 @@ public class EventService {
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .build();
         hitClient.createHit(endpointHit);
+    }
+
+    public List<EventShortDto> getEventsByLocation(long locId, String sort, int from, int size) {
+        Location location = locationRepository.findById(locId).orElseThrow(() ->
+                new ObjectNotFoundException("location with id = " + locId + " not found"));
+        List<Event> events = eventRepository.searchEventsByLocation(location.getLat(), location.getLon(),
+                        location.getRadius(), PageRequest.of(from / size, size))
+                .stream()
+                .collect(Collectors.toList());
+        if (sort.equals("EVENT_DATE")) {
+            events = events.stream()
+                    .sorted(Comparator.comparing(Event::getEventDate))
+                    .collect(Collectors.toList());
+        }
+
+        List<EventShortDto> eventShortDtos = events.stream()
+                .filter(event -> event.getState().equals(State.PUBLISHED))
+                .map(EventMapper::toEventShortDto)
+                .map(this::setConfirmedRequestsAndViewsEventShortDto)
+                .collect(Collectors.toList());
+        if (sort.equals("VIEWS")) {
+            eventShortDtos = eventShortDtos.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews))
+                    .collect(Collectors.toList());
+        }
+        return eventShortDtos;
     }
 }
