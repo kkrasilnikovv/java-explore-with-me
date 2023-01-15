@@ -3,6 +3,7 @@ package ru.practicum.main_server.model;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Getter
@@ -17,8 +18,8 @@ public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "name", length = 100)
+    @Size(max = 256)
+    @Column(name = "name")
     private String name;
 
     @Column(name = "lat", nullable = false)
