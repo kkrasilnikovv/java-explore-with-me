@@ -34,6 +34,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                     LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     void deleteByIdIn(List<Long> id);
+
+    @Query("SELECT e FROM Event AS e " +
+            "WHERE function('distance', e.location.lat, e.location.lon, :lat, :long) <= :radius")
+    Page<Event> searchEventsByLocation(Float lat, Float lon, Float radius, Pageable pageable);
 }
 
 
